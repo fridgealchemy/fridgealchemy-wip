@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FridgeAlchemy — Cook · Forage · Move · Gather</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & BASE ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --forest:    #2C4A2E;
+  --forest-dk: #1A2E1C;
+  --sage:      #7A9B6A;
+  --sage-lt:   #A8C498;
+  --terra:     #C4622A;
+  --terra-lt:  #E8905A;
+  --wheat:     #C4A882;
+  --cream:     #F5F0E8;
+  --cream-dk:  #EDE5D8;
+  --stone:     #3A3028;
+  --muted:     #7A6A5A;
+  --ff-serif:  'Playfair Display', Georgia, serif;
+  --ff-sans:   'DM Sans', system-ui, sans-serif;
+  --ease-out:  cubic-bezier(0.16, 1, 0.3, 1);
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--ff-sans);
+  background: var(--cream);
+  color: var(--stone);
+  overflow-x: hidden;
+}
+
+/* ── GRAIN OVERLAY ────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.35;
+}
+
+/* ── TYPOGRAPHY ───────────────────────────────────────────────── */
+h1, h2, h3 { font-family: var(--ff-serif); }
+p { line-height: 1.75; }
+
+/* ── NAV ──────────────────────────────────────────────────────── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--cream);
+  border-bottom: 1px solid rgba(44,74,46,0.12);
+  padding: 0 clamp(1.5rem, 5vw, 3.5rem);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(245,240,232,0.92);
+}
+.nav-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  text-decoration: none;
+}
+.nav-logo-word {
+  font-family: var(--ff-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--forest);
+  letter-spacing: -0.01em;
+}
+.nav-logo-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--terra);
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-bottom: 3px;
+}
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--forest); }
+.nav-cta {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--terra);
+  text-decoration: none;
+  border: 1.5px solid var(--terra);
+  border-radius: 24px;
+  padding: 7px 18px;
+  letter-spacing: 0.03em;
+  transition: all 0.2s;
+}
+.nav-cta:hover { background: var(--terra); color: var(--cream); }
+.nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+.nav-hamburger span { width: 22px; height: 1.5px; background: var(--forest); display: block; }
+
+/* ── HERO ─────────────────────────────────────────────────────── */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - 64px);
+  max-height: 860px;
+}
+.hero-left {
+  padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+.hero-kicker {
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--terra);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease-out) 0.1s forwards;
+}
+.hero-headline {
+  font-size: clamp(2.8rem, 5.5vw, 4.4rem);
+  font-weight: 700;
+  color: var(--forest);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.9s var(--ease-out) 0.2s forwards;
+}
+.hero-headline em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--terra);
+}
+.hero-body {
+  font-size: 1rem;
+  color: var(--muted);
+  line-height: 1.75;
+  max-width: 400px;
+  margin-bottom: 2.5rem;
+  opacity: 0;
+  animation: fadeUp 0.9s var(--ease-out) 0.35s forwards;
+}
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp 0.9s var(--ease-out) 0.45s forwards;
+}
+.btn-primary {
+  font-family: var(--ff-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: var(--forest);
+  color: var(--cream);
+  border: none;
+  border-radius: 28px;
+  padding: 13px 26px;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: all 0.25s var(--ease-out);
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-primary:hover { background: var(--forest-dk); transform: translateY(-1px); }
+.btn-ghost {
+  font-family: var(--ff-sans);
+  font-size: 0.85rem;
+  color: var(--forest);
+  text-decoration: none;
+  border-bottom: 1px solid var(--wheat);
+  padding-bottom: 2px;
+  letter-spacing: 0.02em;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-ghost:hover { color: var(--terra); border-color: var(--terra); }
+.hero-tag-row {
+  position: absolute;
+  bottom: 2.5rem;
+  left: clamp(1.5rem, 5vw, 4rem);
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp 0.9s var(--ease-out) 0.6s forwards;
+}
+.hero-tag {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sage);
+  background: rgba(122,155,106,0.12);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-weight: 500;
+}
+.hero-right {
+  background: var(--forest-dk);
+  position: relative;
+  overflow: hidden;
+}
+.hero-illustration {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+/* Layered botanical illustration using CSS shapes */
+.hero-bg-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(122,155,106,0.18);
+}
+.hero-badge {
+  position: absolute;
+  bottom: 3rem;
+  right: 3rem;
+  width: 120px;
+  height: 120px;
+  background: var(--terra);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: slowSpin 30s linear infinite;
+  opacity: 0;
+  animation: fadeIn 1.2s var(--ease-out) 0.8s forwards, slowSpin 30s linear 1.2s infinite;
+}
+.hero-badge-inner {
+  font-family: var(--ff-serif);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--cream);
+  text-align: center;
+  line-height: 1.2;
+}
+.hero-badge-sub {
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.7);
+  margin-top: 3px;
+}
+.hero-scroll-hint {
+  position: absolute;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  animation: fadeIn 1s var(--ease-out) 1.2s forwards;
+}
+.hero-scroll-line {
+  width: 1px;
+  height: 40px;
+  background: rgba(122,155,106,0.4);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+.hero-scroll-text {
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(122,155,106,0.6);
+}
+
+/* ── MANIFESTO ────────────────────────────────────────────────── */
+.manifesto {
+  background: var(--forest);
+  padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 3.5rem);
+  position: relative;
+  overflow: hidden;
+}
+.manifesto::before {
+  content: '"';
+  position: absolute;
+  top: -2rem;
+  left: 2rem;
+  font-family: var(--ff-serif);
+  font-size: 18rem;
+  color: rgba(255,255,255,0.03);
+  line-height: 1;
+  pointer-events: none;
+}
+.manifesto-inner {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+}
+.manifesto-text {
+  font-family: var(--ff-serif);
+  font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+  font-style: italic;
+  font-weight: 400;
+  color: rgba(200,220,180,0.85);
+  line-height: 1.65;
+  margin-bottom: 1.5rem;
+}
+.manifesto-text strong {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--cream);
+}
+.manifesto-attr {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sage);
+  font-weight: 500;
+}
+
+/* ── ABOUT ────────────────────────────────────────────────────── */
+.about {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 4rem;
+  align-items: start;
+  padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 3.5rem);
+  border-bottom: 1px solid rgba(44,74,46,0.1);
+}
+.about-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--terra);
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+.about-headline {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 700;
+  font-style: italic;
+  color: var(--forest);
+  line-height: 1.15;
+}
+.about-body p {
+  font-size: 0.95rem;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+.about-body p:last-child { margin-bottom: 0; }
+.about-sig {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.about-sig-line { width: 32px; height: 1px; background: var(--wheat); }
+.about-sig-text {
+  font-family: var(--ff-serif);
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--wheat);
+}
+
+/* ── PILLARS ──────────────────────────────────────────────────── */
+.pillars-section {
+  padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 3.5rem);
+  background: var(--cream-dk);
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2.5rem;
+}
+.section-title {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700;
+  font-style: italic;
+  color: var(--forest);
+  line-height: 1.1;
+}
+.section-link {
+  font-size: 0.8rem;
+  color: var(--terra);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid rgba(196,98,42,0.3);
+  padding-bottom: 1px;
+  transition: border-color 0.2s;
+  white-space: nowrap;
+}
+.section-link:hover { border-color: var(--terra); }
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.pillar-card {
+  background: var(--cream);
+  border-radius: 14px;
+  padding: 1.75rem 1.4rem;
+  border: 1px solid rgba(44,74,46,0.08);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s;
+  cursor: default;
+}
+.pillar-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(44,74,46,0.1);
+}
+.pillar-num {
+  font-family: var(--ff-serif);
+  font-size: 2.8rem;
+  font-weight: 900;
+  font-style: italic;
+  color: rgba(44,74,46,0.1);
+  line-height: 1;
+  margin-bottom: 0.75rem;
+}
+.pillar-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--forest);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.02em;
+}
+.pillar-desc {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+/* ── EDITORIAL ────────────────────────────────────────────────── */
+.editorial {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 380px;
+}
+.ed-image {
+  background: var(--forest-dk);
+  position: relative;
+  overflow: hidden;
+  min-height: 320px;
+}
+.ed-image-inner {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+.ed-content {
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(2rem, 4vw, 3.5rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid rgba(44,74,46,0.1);
+}
+.ed-kicker {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sage);
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+}
+.ed-title {
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-weight: 700;
+  font-style: italic;
+  color: var(--forest);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+.ed-body {
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}
+.ed-link {
+  font-size: 0.82rem;
+  color: var(--terra);
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid rgba(196,98,42,0.3);
+  padding-bottom: 2px;
+  display: inline-block;
+  transition: border-color 0.2s;
+}
+.ed-link:hover { border-color: var(--terra); }
+
+/* ── EVENTS ───────────────────────────────────────────────────── */
+.events-section {
+  padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 3.5rem);
+  background: var(--cream-dk);
+}
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 2rem;
+}
+.event-card {
+  background: var(--cream);
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(44,74,46,0.08);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s;
+}
+.event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(44,74,46,0.1);
+}
+.event-img {
+  height: 110px;
+  position: relative;
+  overflow: hidden;
+}
+.event-body { padding: 1.25rem 1.2rem; }
+.event-cat {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--terra);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.event-title {
+  font-family: var(--ff-serif);
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--forest);
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+.event-meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+.event-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.event-price {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--forest);
+  font-family: var(--ff-serif);
+}
+.event-book {
+  font-size: 0.75rem;
+  color: var(--terra);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: opacity 0.2s;
+}
+.event-book:hover { opacity: 0.7; }
+
+/* ── INTERNATIONAL ────────────────────────────────────────────── */
+.international {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  background: var(--forest-dk);
+}
+.int-content {
+  padding: clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem);
+}
+.int-kicker {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--terra);
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+.int-title {
+  font-family: var(--ff-serif);
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-style: italic;
+  color: var(--cream);
+  line-height: 1.15;
+  margin-bottom: 1.25rem;
+}
+.int-body {
+  font-size: 0.9rem;
+  color: rgba(200,220,180,0.65);
+  line-height: 1.8;
+  max-width: 480px;
+  margin-bottom: 2rem;
+}
+.int-btn {
+  font-family: var(--ff-sans);
+  font-size: 0.82rem;
+  color: var(--cream);
+  text-decoration: none;
+  border: 1px solid rgba(245,240,232,0.25);
+  border-radius: 24px;
+  padding: 10px 22px;
+  display: inline-block;
+  transition: all 0.2s;
+  letter-spacing: 0.03em;
+}
+.int-btn:hover { background: rgba(245,240,232,0.1); border-color: rgba(245,240,232,0.4); }
+.int-aside {
+  background: rgba(0,0,0,0.2);
+  padding: clamp(2.5rem, 4vw, 3.5rem) 2rem;
+  border-left: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.int-quote {
+  font-family: var(--ff-serif);
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--wheat);
+  line-height: 1.65;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 1.5rem;
+}
+.int-stat {
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.int-stat:last-child { border-bottom: none; }
+.int-stat-val {
+  font-family: var(--ff-serif);
+  font-size: 2rem;
+  font-style: italic;
+  font-weight: 700;
+  color: var(--wheat);
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.int-stat-label {
+  font-size: 0.75rem;
+  color: rgba(122,155,106,0.7);
+  line-height: 1.4;
+}
+
+/* ── NEWSLETTER ───────────────────────────────────────────────── */
+.newsletter {
+  padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 3.5rem);
+  text-align: center;
+  border-top: 1px solid rgba(44,74,46,0.1);
+  background: var(--cream);
+}
+.newsletter-title {
+  font-family: var(--ff-serif);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-style: italic;
+  color: var(--forest);
+  margin-bottom: 0.75rem;
+}
+.newsletter-body {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 2rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.newsletter-form {
+  display: flex;
+  gap: 10px;
+  max-width: 420px;
+  margin: 0 auto 1rem;
+}
+.newsletter-input {
+  flex: 1;
+  font-family: var(--ff-sans);
+  font-size: 0.85rem;
+  padding: 12px 18px;
+  border: 1.5px solid rgba(44,74,46,0.18);
+  border-radius: 28px;
+  background: var(--cream);
+  color: var(--stone);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.newsletter-input::placeholder { color: var(--muted); opacity: 0.6; }
+.newsletter-input:focus { border-color: var(--sage); }
+.newsletter-submit {
+  font-family: var(--ff-sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  background: var(--terra);
+  color: var(--cream);
+  border: none;
+  border-radius: 28px;
+  padding: 12px 22px;
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  transition: background 0.2s, transform 0.15s;
+}
+.newsletter-submit:hover { background: #A84E1E; transform: translateY(-1px); }
+.newsletter-note { font-size: 0.72rem; color: var(--muted); opacity: 0.7; }
+
+/* ── FOOTER ───────────────────────────────────────────────────── */
+footer {
+  background: var(--forest-dk);
+  padding: clamp(3rem, 5vw, 4rem) clamp(1.5rem, 5vw, 3.5rem) 2rem;
+}
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 3rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 1.5rem;
+}
+.footer-logo-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-bottom: 0.5rem;
+}
+.footer-logo-text {
+  font-family: var(--ff-serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--cream);
+}
+.footer-logo-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--terra);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.footer-tagline {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+.footer-about {
+  font-size: 0.82rem;
+  color: rgba(200,220,180,0.45);
+  line-height: 1.7;
+}
+.footer-col-title {
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(122,155,106,0.6);
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+.footer-links { list-style: none; }
+.footer-links li { margin-bottom: 0.5rem; }
+.footer-links a {
+  font-size: 0.82rem;
+  color: rgba(200,220,180,0.4);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--wheat); }
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.footer-copy { font-size: 0.72rem; color: rgba(200,220,180,0.25); }
+.footer-social { display: flex; gap: 1.25rem; }
+.footer-social a {
+  font-size: 0.72rem;
+  color: rgba(200,220,180,0.3);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  transition: color 0.2s;
+}
+.footer-social a:hover { color: var(--sage); }
+
+/* ── SVG ILLUSTRATIONS ────────────────────────────────────────── */
+.svg-hero-scene, .svg-ed-scene, .svg-event-scene { width: 100%; height: 100%; }
+
+/* ── ANIMATIONS ───────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scrollPulse {
+  0%, 100% { transform: scaleY(1); opacity: 0.4; }
+  50%       { transform: scaleY(1.3); opacity: 0.8; }
+}
+@keyframes slowSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── RESPONSIVE ───────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .pillars-grid { grid-template-columns: 1fr 1fr; }
+  .events-grid  { grid-template-columns: 1fr 1fr; }
+  .international { grid-template-columns: 1fr; }
+  .int-aside { display: none; }
+}
+@media (max-width: 680px) {
+  .hero { grid-template-columns: 1fr; max-height: none; }
+  .hero-right { height: 260px; }
+  .hero-scroll-hint { display: none; }
+  .about { grid-template-columns: 1fr; gap: 2rem; }
+  .editorial { grid-template-columns: 1fr; }
+  .ed-image { min-height: 240px; }
+  .events-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+  .nav-links, .nav-cta { display: none; }
+  .nav-hamburger { display: flex; }
+}
+@media (max-width: 420px) {
+  .pillars-grid { grid-template-columns: 1fr; }
+  .newsletter-form { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <span class="nav-logo-word">FridgeAlchemy</span>
+    <span class="nav-logo-dot"></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#events">Events</a></li>
+    <li><a href="#workshops">Workshops</a></li>
+    <li><a href="#foraging">Foraging</a></li>
+    <li><a href="#retreats">Retreats</a></li>
+    <li><a href="#about">About</a></li>
+  </ul>
+  <a class="nav-cta" href="#events">Book a place</a>
+  <div class="nav-hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <p class="hero-kicker">Monmouthshire &middot; Wales &middot; est. 2025</p>
+    <h1 class="hero-headline">
+      Cook what<br>
+      you <em>already</em><br>
+      have
+    </h1>
+    <p class="hero-body">FridgeAlchemy is a community kitchen, a foraging walk, a trail run and a long shared lunch. Based in the hills between Abergavenny and Raglan &mdash; open to everyone, no experience required.</p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="#events">Upcoming events</a>
+      <a class="btn-ghost" href="#about">Our story</a>
+    </div>
+    <div class="hero-tag-row">
+      <span class="hero-tag">Gluten-free friendly</span>
+      <span class="hero-tag">Local producers</span>
+      <span class="hero-tag">Abruzzo retreats</span>
+    </div>
+  </div>
+  <div class="hero-right">
+    <svg class="svg-hero-scene" viewBox="0 0 600 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <!-- Sky / background wash -->
+      <rect width="600" height="700" fill="#1A2E1C"/>
+      <!-- Rolling hills -->
+      <ellipse cx="300" cy="580" rx="420" ry="160" fill="#243C26" opacity="0.9"/>
+      <ellipse cx="100" cy="520" rx="240" ry="130" fill="#2C4A2E" opacity="0.85"/>
+      <ellipse cx="480" cy="540" rx="200" ry="110" fill="#254028" opacity="0.8"/>
+      <path d="M0 480 Q120 380 240 420 Q360 460 480 380 Q560 330 600 360 L600 700 L0 700Z" fill="#1E3420" opacity="0.95"/>
+      <path d="M0 540 Q80 500 200 520 Q320 540 420 500 Q520 465 600 490 L600 700 L0 700Z" fill="#162A18"/>
+      <!-- Moon / sun circle -->
+      <circle cx="460" cy="120" r="55" fill="#C4A882" opacity="0.18"/>
+      <circle cx="460" cy="120" r="42" fill="#C4A882" opacity="0.22"/>
+      <!-- Stars dots -->
+      <circle cx="80"  cy="60"  r="1.2" fill="#C4A882" opacity="0.5"/>
+      <circle cx="150" cy="40"  r="0.8" fill="#C4A882" opacity="0.4"/>
+      <circle cx="220" cy="90"  r="1"   fill="#C4A882" opacity="0.5"/>
+      <circle cx="310" cy="50"  r="1.5" fill="#C4A882" opacity="0.6"/>
+      <circle cx="380" cy="30"  r="0.9" fill="#C4A882" opacity="0.4"/>
+      <circle cx="520" cy="55"  r="1.1" fill="#C4A882" opacity="0.45"/>
+      <circle cx="560" cy="100" r="0.7" fill="#C4A882" opacity="0.35"/>
+      <circle cx="130" cy="130" r="0.9" fill="#C4A882" opacity="0.3"/>
+      <circle cx="260" cy="140" r="1.2" fill="#C4A882" opacity="0.4"/>
+      <!-- Tree silhouettes -->
+      <rect x="55"  y="370" width="6" height="90" rx="3" fill="#0F1E10"/>
+      <ellipse cx="58" cy="355" rx="22" ry="38" fill="#0F1E10"/>
+      <rect x="530" y="350" width="6" height="110" rx="3" fill="#0F1E10"/>
+      <ellipse cx="533" cy="330" rx="26" ry="44" fill="#0F1E10"/>
+      <rect x="420" y="390" width="5" height="80" rx="3" fill="#0F1E10"/>
+      <ellipse cx="423" cy="375" rx="18" ry="30" fill="#0F1E10"/>
+      <!-- Warm kitchen window glow -->
+      <rect x="220" y="430" width="160" height="110" rx="8" fill="#C4622A" opacity="0.08"/>
+      <rect x="235" y="445" width="58" height="44" rx="4" fill="#C4622A" opacity="0.22"/>
+      <rect x="307" y="445" width="58" height="44" rx="4" fill="#C4A882" opacity="0.18"/>
+      <rect x="235" y="498" width="58" height="34" rx="4" fill="#C4A882" opacity="0.15"/>
+      <rect x="307" y="498" width="58" height="34" rx="4" fill="#C4622A" opacity="0.2"/>
+      <!-- Foreground grasses -->
+      <line x1="40"  y1="700" x2="55"  y2="620" stroke="#3A5C3C" stroke-width="1.5" opacity="0.6"/>
+      <line x1="50"  y1="700" x2="62"  y2="610" stroke="#3A5C3C" stroke-width="1"   opacity="0.5"/>
+      <line x1="540" y1="700" x2="528" y2="625" stroke="#3A5C3C" stroke-width="1.5" opacity="0.6"/>
+      <line x1="555" y1="700" x2="545" y2="615" stroke="#3A5C3C" stroke-width="1"   opacity="0.4"/>
+      <!-- Caption -->
+      <text x="300" y="678" text-anchor="middle" font-family="Georgia, serif" font-size="10" font-style="italic" fill="#7A9B6A" opacity="0.55">the hills above Abergavenny</text>
+    </svg>
+    <!-- Circular badge -->
+    <div class="hero-badge">
+      <span class="hero-badge-inner">Fridge<br>Alchemy</span>
+      <span class="hero-badge-sub">est. 2025</span>
+    </div>
+    <!-- Scroll hint -->
+    <div class="hero-scroll-hint">
+      <div class="hero-scroll-line"></div>
+      <span class="hero-scroll-text">Scroll</span>
+    </div>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<section class="manifesto">
+  <div class="manifesto-inner reveal">
+    <p class="manifesto-text">
+      &ldquo;You don&rsquo;t need a recipe for every occasion. You need
+      <strong>curiosity, a well-kept larder,</strong> and the confidence
+      that what&rsquo;s in your fridge right now is enough to make
+      something worth eating.&rdquo;
+    </p>
+    <p class="manifesto-attr">The FridgeAlchemy philosophy</p>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="reveal">
+    <p class="about-label">Who we are</p>
+    <h2 class="about-headline">An experienced cook, a fell runner, a forager.</h2>
+  </div>
+  <div class="about-body reveal" style="transition-delay:0.1s;">
+    <p>FridgeAlchemy grew out of 21 years running a business, a lifetime of cooking without formal training, and the conviction that the Welsh Borders landscape holds everything you need to eat extraordinarily well. No chef&rsquo;s hat. No Michelin ambitions. Just real food, honestly made, from where we are.</p>
+    <p>We run supper clubs and workshops from our Monmouthshire base, lead foraging walks in the Wye Valley and the Brecon foothills, offer running and nutrition coaching, and host wellbeing retreats in Wales and Abruzzo, Italy. Gluten-free and NCAS catering is part of everything we do, not an afterthought.</p>
+    <div class="about-sig">
+      <div class="about-sig-line"></div>
+      <span class="about-sig-text">Between Abergavenny and Raglan, Monmouthshire</span>
+    </div>
+  </div>
+</section>
+
+<!-- PILLARS -->
+<section class="pillars-section" id="workshops">
+  <div class="section-header reveal">
+    <h2 class="section-title">Four ways in</h2>
+    <a class="section-link" href="#events">See all events &rarr;</a>
+  </div>
+  <div class="pillars-grid">
+    <div class="pillar-card reveal" style="transition-delay:0.05s;">
+      <div class="pillar-num">01</div>
+      <p class="pillar-name">Kitchen</p>
+      <p class="pillar-desc">Supper clubs, workshops and producer dinners. GF throughout. Home and farm venues across Monmouthshire.</p>
+    </div>
+    <div class="pillar-card reveal" style="transition-delay:0.12s;" id="foraging">
+      <div class="pillar-num">02</div>
+      <p class="pillar-name">Foraging</p>
+      <p class="pillar-desc">Seasonal walks in the Wye Valley and Black Mountains. Find it, identify it, cook it the same day.</p>
+    </div>
+    <div class="pillar-card reveal" style="transition-delay:0.18s;">
+      <div class="pillar-num">03</div>
+      <p class="pillar-name">Movement</p>
+      <p class="pillar-desc">Trail running coaching, nutrition for active people, canicross sessions and cycling days in the lanes.</p>
+    </div>
+    <div class="pillar-card reveal" style="transition-delay:0.24s;" id="retreats">
+      <div class="pillar-num">04</div>
+      <p class="pillar-name">Retreats</p>
+      <p class="pillar-desc">Wellbeing days in Wales. Seasonal weeks in Abruzzo &mdash; forage, run, cook, eat, rest.</p>
+    </div>
+  </div>
+</section>
+
+<!-- EDITORIAL -->
+<section class="editorial">
+  <div class="ed-image">
+    <svg class="svg-ed-scene" viewBox="0 0 480 380" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <rect width="480" height="380" fill="#1A2E1C"/>
+      <ellipse cx="240" cy="300" rx="300" ry="110" fill="#243C26" opacity="0.8"/>
+      <path d="M0 240 Q100 190 200 220 Q300 250 400 200 Q450 175 480 190 L480 380 L0 380Z" fill="#1A2E1C"/>
+      <!-- Table top -->
+      <rect x="60" y="160" width="360" height="14" rx="7" fill="#5A3A20" opacity="0.7"/>
+      <!-- Pot -->
+      <ellipse cx="200" cy="158" rx="50" ry="18" fill="#8A5A30" opacity="0.8"/>
+      <rect x="153" y="100" width="94" height="60" rx="8" fill="#6A4020" opacity="0.85"/>
+      <ellipse cx="200" cy="102" rx="47" ry="14" fill="#7A4A25" opacity="0.9"/>
+      <!-- Steam wisps -->
+      <path d="M185 95 Q180 75 188 58 Q196 42 192 25" fill="none" stroke="#C4A882" stroke-width="1.2" opacity="0.3" stroke-linecap="round"/>
+      <path d="M200 92 Q204 72 198 55 Q192 38 198 20" fill="none" stroke="#C4A882" stroke-width="1.2" opacity="0.25" stroke-linecap="round"/>
+      <path d="M215 95 Q222 76 215 58 Q208 40 214 24" fill="none" stroke="#C4A882" stroke-width="1.2" opacity="0.3" stroke-linecap="round"/>
+      <!-- Herb bunch -->
+      <line x1="310" y1="165" x2="310" y2="100" stroke="#4A7A3A" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="298" cy="100" rx="10" ry="16" fill="#3A6A2A" opacity="0.8" transform="rotate(-20,298,108)"/>
+      <ellipse cx="316" cy="96"  rx="10" ry="16" fill="#4A7A3A" opacity="0.8" transform="rotate(15,316,104)"/>
+      <ellipse cx="308" cy="92"  rx="8"  ry="14" fill="#5A8A4A" opacity="0.7" transform="rotate(-5,308,100)"/>
+      <!-- Bowl -->
+      <ellipse cx="340" cy="156" rx="32" ry="10" fill="#C4A882" opacity="0.6"/>
+      <path d="M310 156 Q318 175 340 178 Q362 175 370 156Z" fill="#B89870" opacity="0.5"/>
+      <!-- Caption -->
+      <text x="240" y="365" text-anchor="middle" font-family="Georgia,serif" font-size="10" font-style="italic" fill="#7A9B6A" opacity="0.5">the larder philosophy</text>
+    </svg>
+  </div>
+  <div class="ed-content reveal">
+    <p class="ed-kicker">The philosophy</p>
+    <h2 class="ed-title">The fridge is already full of something worth cooking</h2>
+    <p class="ed-body">Most people think good cooking requires expensive ingredients or specialist knowledge. FridgeAlchemy exists to disprove both. The method is about understanding what you have, knowing how flavours work together, and building the kind of larder that makes improvisation possible. No recipe required.</p>
+    <a class="ed-link" href="#about">Read more about the approach &rarr;</a>
+  </div>
+</section>
+
+<!-- EVENTS -->
+<section class="events-section" id="events">
+  <div class="section-header reveal">
+    <h2 class="section-title">Coming up</h2>
+    <a class="section-link" href="#">All events &rarr;</a>
+  </div>
+  <div class="events-grid">
+    <div class="event-card reveal" style="transition-delay:0.05s;">
+      <div class="event-img">
+        <svg class="svg-event-scene" viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect width="320" height="110" fill="#2C4A2E"/>
+          <ellipse cx="160" cy="88" rx="200" ry="50" fill="#1E3420" opacity="0.8"/>
+          <text x="160" y="56" text-anchor="middle" font-family="Georgia,serif" font-size="14" font-style="italic" fill="#F5F0E8" opacity="0.65">summer supper</text>
+          <line x1="60" y1="70" x2="260" y2="70" stroke="#7A9B6A" stroke-width="0.5" opacity="0.3"/>
+          <circle cx="100" cy="40" r="16" fill="#C4622A" opacity="0.3"/>
+          <circle cx="200" cy="35" r="20" fill="#7A9B6A" opacity="0.2"/>
+        </svg>
+      </div>
+      <div class="event-body">
+        <p class="event-cat">Supper club</p>
+        <p class="event-title">Summer larder evening</p>
+        <p class="event-meta">Home kitchen, Raglan &middot; 8 guests &middot; GF menu</p>
+        <div class="event-footer">
+          <span class="event-price">&pound;45</span>
+          <a class="event-book" href="#">Book &rarr;</a>
+        </div>
+      </div>
+    </div>
+    <div class="event-card reveal" style="transition-delay:0.12s;">
+      <div class="event-img">
+        <svg class="svg-event-scene" viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect width="320" height="110" fill="#1E3420"/>
+          <ellipse cx="160" cy="90" rx="220" ry="55" fill="#3A5C3C" opacity="0.5"/>
+          <text x="160" y="56" text-anchor="middle" font-family="Georgia,serif" font-size="14" font-style="italic" fill="#A8C498" opacity="0.7">forage &amp; cook</text>
+          <circle cx="80"  cy="38" r="12" fill="#4A7A3A" opacity="0.4"/>
+          <circle cx="140" cy="32" r="18" fill="#5A8A4A" opacity="0.35"/>
+          <circle cx="220" cy="36" r="14" fill="#3A6A2A" opacity="0.4"/>
+          <circle cx="275" cy="42" r="10" fill="#4A7A3A" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="event-body">
+        <p class="event-cat">Workshop</p>
+        <p class="event-title">Elderflower &mdash; forage to table</p>
+        <p class="event-meta">The Skirrid &middot; half day &middot; 8 people max</p>
+        <div class="event-footer">
+          <span class="event-price">&pound;90</span>
+          <a class="event-book" href="#">Book &rarr;</a>
+        </div>
+      </div>
+    </div>
+    <div class="event-card reveal" style="transition-delay:0.18s;">
+      <div class="event-img">
+        <svg class="svg-event-scene" viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect width="320" height="110" fill="#3A2518"/>
+          <ellipse cx="160" cy="92" rx="220" ry="55" fill="#2A1C10" opacity="0.8"/>
+          <text x="160" y="50" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-style="italic" fill="#C4A882" opacity="0.75">Abruzzo, Italy</text>
+          <text x="160" y="70" text-anchor="middle" font-family="Georgia,serif" font-size="10" font-style="italic" fill="#C4A882" opacity="0.4">spring &amp; autumn</text>
+          <circle cx="160" cy="38" r="22" fill="#C4622A" opacity="0.25"/>
+          <line x1="80" y1="98" x2="240" y2="98" stroke="#C4A882" stroke-width="0.5" opacity="0.2"/>
+        </svg>
+      </div>
+      <div class="event-body">
+        <p class="event-cat">Retreat &middot; Italy</p>
+        <p class="event-title">Abruzzo &mdash; autumn week</p>
+        <p class="event-meta">Abruzzo hills &middot; 5 nights &middot; 10 guests max</p>
+        <div class="event-footer">
+          <span class="event-price">&pound;1,400</span>
+          <a class="event-book" href="#">Enquire &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERNATIONAL -->
+<section class="international">
+  <div class="int-content reveal">
+    <p class="int-kicker">Seasonal retreats &middot; Abruzzo, Italy</p>
+    <h2 class="int-title">The same philosophy,<br>a different landscape</h2>
+    <p class="int-body">Each spring and autumn, FridgeAlchemy moves to a hillside retreat in Abruzzo &mdash; one of Italy&rsquo;s most quietly extraordinary food landscapes. Five nights of foraging the Apennine slopes, cooking with local producers, running the mountain trails, and eating long dinners under the stars. The Welsh larder instinct, translated into Italian.</p>
+    <a class="int-btn" href="#">Find out about Abruzzo &rarr;</a>
+  </div>
+  <div class="int-aside reveal" style="transition-delay:0.15s;">
+    <p class="int-quote">&ldquo;Wild herbs on the hillside in the morning, in the pot by noon.&rdquo;</p>
+    <div class="int-stat">
+      <p class="int-stat-val">10</p>
+      <p class="int-stat-label">guests maximum per retreat</p>
+    </div>
+    <div class="int-stat">
+      <p class="int-stat-val">5</p>
+      <p class="int-stat-label">nights, spring &amp; autumn</p>
+    </div>
+    <div class="int-stat">
+      <p class="int-stat-val">2</p>
+      <p class="int-stat-label">retreats per year from 2027</p>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter">
+  <h2 class="newsletter-title reveal">The FridgeAlchemy letter</h2>
+  <p class="newsletter-body reveal" style="transition-delay:0.1s;">Seasonal recipes, foraging notes, upcoming events and the occasional field dispatch from Abruzzo. No noise.</p>
+  <div class="newsletter-form reveal" style="transition-delay:0.2s;">
+    <input class="newsletter-input" type="email" placeholder="your@email.com">
+    <button class="newsletter-submit">Subscribe</button>
+  </div>
+  <p class="newsletter-note reveal" style="transition-delay:0.25s;">No spam. Unsubscribe anytime.</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="reveal">
+      <div class="footer-logo-wrap">
+        <span class="footer-logo-text">FridgeAlchemy</span>
+        <span class="footer-logo-dot"></span>
+      </div>
+      <p class="footer-tagline">Cook &middot; Forage &middot; Move &middot; Gather</p>
+      <p class="footer-about">Between Abergavenny and Raglan, Monmouthshire. Seasonal retreats in Abruzzo, Italy. Gluten-free and NCAS catering throughout.</p>
+    </div>
+    <div class="reveal" style="transition-delay:0.1s;">
+      <p class="footer-col-title">Explore</p>
+      <ul class="footer-links">
+        <li><a href="#">Supper clubs</a></li>
+        <li><a href="#">Workshops</a></li>
+        <li><a href="#">Foraging walks</a></li>
+        <li><a href="#">Wellbeing days</a></li>
+        <li><a href="#">Abruzzo retreats</a></li>
+      </ul>
+    </div>
+    <div class="reveal" style="transition-delay:0.15s;">
+      <p class="footer-col-title">Connect</p>
+      <ul class="footer-links">
+        <li><a href="#">Newsletter</a></li>
+        <li><a href="#">Instagram</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Gift a place</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">&copy; FridgeAlchemy 2026 &middot; Monmouthshire, Wales</p>
+    <div class="footer-social">
+      <a href="#">Instagram</a>
+      <a href="#">Newsletter</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Scroll reveal */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+/* Mobile menu (simplified toggle) */
+function toggleMenu() {
+  const links = document.querySelector('.nav-links');
+  const cta   = document.querySelector('.nav-cta');
+  if (links) {
+    const open = links.style.display === 'flex';
+    links.style.cssText = open ? '' : 'display:flex;flex-direction:column;position:absolute;top:64px;left:0;right:0;background:rgba(245,240,232,0.97);padding:1.5rem 2rem;gap:1rem;border-bottom:1px solid rgba(44,74,46,0.12);backdrop-filter:blur(12px);z-index:99;';
+    if (cta) cta.style.display = open ? '' : 'none';
+  }
+}
+</script>
+</body>
+</html>
